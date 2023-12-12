@@ -18,14 +18,14 @@
 	"type": "module",
 	"repository": {
 	  "type": "git",
-	  "url": "git+https://github.com/art1shok13/oribt_calculation_simulation.git"
+	  "url": "git+https://github.com/art1shok13/orbit_calculation_simulation.git"
 	},
 	"author": "Roman Artyshevskyi",
 	"license": "ISC",
 	"bugs": {
-	  "url": "https://github.com/art1shok13/oribt_calculation_simulation/issues"
+	  "url": "https://github.com/art1shok13/orbit_calculation_simulation/issues"
 	},
-	"homepage": "https://github.com/art1shok13/oribt_calculation_simulation#readme",
+	"homepage": "https://github.com/art1shok13/orbit_calculation_simulation#readme",
 	"dependencies": {
 		"three": "^0.158.0"
 	}
