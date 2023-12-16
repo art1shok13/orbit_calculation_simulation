@@ -13,15 +13,20 @@
         addOrbit = () => {
             const orbit = new Orbit({i: 0, Ω: 0, ω: 0}, 0, 1, 0, {}, '#46a62d', 1, 'New Orbit' )
             scene.add(orbit.getMesh())
-            orbitsList.push(orbit)
+            orbitsList = [...orbitsList, orbit]
+            orbitsList = orbitsList
+            // orbit.toggleObject('ΩAngle', 1)
+            // orbit.toggleObject('ωAngle', 1)
         }
         changeOrbit = ({i, Ω, ω, P, a, e, color, name, id}) => {
-            scene.remove(orbitsList[id].getMesh())
+            orbitsList[id].remove(scene)
             orbitsList[id] = new Orbit({i, Ω, ω}, P, a, e, {}, color, 1, name, orbitsList[id].states )
             scene.add(orbitsList[id].getMesh())
+
+            orbitsList = orbitsList
         }
         deleteOrbit = (id) => {
-            scene.remove(orbitsList[id].getMesh())
+            orbitsList[id].remove(scene)
             orbitsList.splice(id, 1)
             orbitsList = orbitsList
 
@@ -34,15 +39,16 @@
             currentElement.id = id
             currentElement.do = !currentElement.do
             currentElement.states = orbitsList[id].states
-        }
+        }   
         toggleObject = (obj) => {
             const [key, value] = Object.entries(obj)[0]
             orbitsList[currentElement.id].toggleObject(key, value)
         }
         addOrbitToScene = ({semimajor_axis: a, eccentricity: e, i, omega: ω, OMEGA: Ω }) => {
             const orbit = new Orbit({i, Ω, ω}, 1, a, e, {}, undefined, 1)
-            orbitsList.push(orbit)
             scene.add(orbit.getMesh())
+            orbitsList.push(orbit)
+            orbitsList = orbitsList
         }
     })
     
