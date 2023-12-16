@@ -56,7 +56,6 @@ class Orbit {
         }
         //orbit func with t: [0,1]
         const orbitFunction = (t, v) => {
-            console.log(t)
             if(e===1) {
                 const sigma = (t*2-1)*4
                 const r = a*(1+sigma**2)

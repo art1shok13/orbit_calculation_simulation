@@ -1,46 +1,52 @@
 <script>
     import {createEventDispatcher} from 'svelte';
     const dispatch = createEventDispatcher();
+    
     import {OrbitCalculator} from '$lib/classes/ThreeObservations.js';
-    let alpha = [{}, {}, {}]
-    alpha = alpha
+    import {threeObservationsData} from '$lib/classes/store.js';
 
-    let delta = [{}, {}, {}]
-    delta = delta
+    if(Object.entries($threeObservationsData).length != 7) {
+        $threeObservationsData = {
+            X: [0, 0, 0],
+            Y: [0, 0, 0],
+            Z: [0, 0, 0],
+            alpha: [{}, {}, {}],
+            delta: [{}, {}, {}],
+            date: [],
+            time: []
+        }
+    }
+    let {X, Y, Z, alpha, delta, date, time} = $threeObservationsData
+    $: $threeObservationsData = {X, Y, Z, alpha, delta, date, time}
 
-    let date = []
-    let time = []
-
-    let X = []
-    let Y = []
-    let Z = []
-    let out = []
-    let output = {}
-    out = out
+    let outputLOG = []
+    let orbitElements = {}
+    
     const submit = () => {
-        const date_time = ['', '', ''].map((val, i) => {
+        const date_time = ['', '', ''].map( (val, i) => {
             if(!date[i] || !time[i]) return '20.10.2001'
+
             return date[i].toString() + ' ' + time[i].toString()
         })
+
         const Calculator = new OrbitCalculator(X, Y, Z, alpha, delta, date_time)
-        const output = Calculator.calculate_orbit()
-        console.log(output, Calculator.getLOG())
-        out = Calculator.getLOG()
+        orbitElements = Calculator.calculate_orbit()
+        outputLOG = Calculator.getLOG()
     }
 
     const clear = () => {
         if(!confirm('CLEAR?')) return
+        X = [0, 0, 0]
+        Y = [0, 0, 0]
+        Z = [0, 0, 0]
+        
         alpha = [{}, {}, {}]
-
         delta = [{}, {}, {}]
-
         date = []
         time = []
 
-        X = []
-        Y = []
-        Z = []
-        out = []
+        outputLOG = []
+        orbitElements = {}
     }
     
 </script>
@@ -48,15 +54,15 @@
     <div class="indata-wrapper">
         <div class="input-wrapper alpha-input">
             <span>α<sub>0</sub>:</span>
-            <input required type="text" bind:value={alpha[0].h} placeholder="h">
-            <input required type="text" bind:value={alpha[0].m} placeholder="m">
-            <input required type="text" bind:value={alpha[0].s} placeholder="s">
+            <input required type="number" bind:value={alpha[0].h} placeholder="h">
+            <input required type="number" bind:value={alpha[0].m} placeholder="m">
+            <input required type="number" bind:value={alpha[0].s} placeholder="s">
         </div>
         <div class="input-wrapper delta-input">
             <span>δ<sub>0</sub>:</span>
-            <input required type="text" bind:value={delta[0].d} placeholder="°">
-            <input required type="text" bind:value={delta[0].m} placeholder="m">
-            <input required type="text" bind:value={delta[0].s} placeholder="s">
+            <input required type="number" bind:value={delta[0].d} placeholder="°">
+            <input required type="number" bind:value={delta[0].m} placeholder="m">
+            <input required type="number" bind:value={delta[0].s} placeholder="s">
         </div>
         <div class="input-wrapper t-input">
             <span>t<sub>0</sub>:</span>
@@ -65,27 +71,27 @@
         </div>
         <div class="input-wrapper X-input">
             <span>X<sub>0</sub>:</span>
-            <input required bind:value={X[0]} type="text">
+            <input required bind:value={X[0]} type="number">
         </div>
         <div class="input-wrapper Y-input">
             <span>Y<sub>0</sub>:</span>
-            <input required bind:value={Y[0]} type="text">
+            <input required bind:value={Y[0]} type="number">
         </div>
         <div class="input-wrapper Z-input">
             <span>Z<sub>0</sub>:</span>
-            <input required bind:value={Z[0]} type="text">
+            <input required bind:value={Z[0]} type="number">
         </div>
         <div class="input-wrapper alpha-input">
             <span>α<sub>1</sub>:</span>
-            <input required type="text" bind:value={alpha[1].h} placeholder="h">
-            <input required type="text" bind:value={alpha[1].m} placeholder="m">
-            <input required type="text" bind:value={alpha[1].s} placeholder="s">
+            <input required type="number" bind:value={alpha[1].h} placeholder="h">
+            <input required type="number" bind:value={alpha[1].m} placeholder="m">
+            <input required type="number" bind:value={alpha[1].s} placeholder="s">
         </div>
         <div class="input-wrapper delta-input">
             <span>δ<sub>1</sub>:</span>
-            <input required type="text" bind:value={delta[1].d} placeholder="°">
-            <input required type="text" bind:value={delta[1].m} placeholder="m">
-            <input required type="text" bind:value={delta[1].s} placeholder="s">
+            <input required type="number" bind:value={delta[1].d} placeholder="°">
+            <input required type="number" bind:value={delta[1].m} placeholder="m">
+            <input required type="number" bind:value={delta[1].s} placeholder="s">
         </div>
         <div class="input-wrapper t-input">
             <span>t<sub>1</sub>:</span>
@@ -94,27 +100,27 @@
         </div>
         <div class="input-wrapper X-input">
             <span>X<sub>1</sub>:</span>
-            <input required bind:value={X[1]} type="text">
+            <input required bind:value={X[1]} type="number">
         </div>
         <div class="input-wrapper Y-input">
             <span>Y<sub>1</sub>:</span>
-            <input required bind:value={Y[1]} type="text">
+            <input required bind:value={Y[1]} type="number">
         </div>
         <div class="input-wrapper Z-input">
             <span>Z<sub>1</sub>:</span>
-            <input required bind:value={Z[1]} type="text">
+            <input required bind:value={Z[1]} type="number">
         </div>
         <div class="input-wrapper alpha-input">
             <span>α<sub>2</sub>:</span>
-            <input required type="text" bind:value={alpha[2].h} placeholder="h">
-            <input required type="text" bind:value={alpha[2].m} placeholder="m">
-            <input required type="text" bind:value={alpha[2].s} placeholder="s">
+            <input required type="number" bind:value={alpha[2].h} placeholder="h">
+            <input required type="number" bind:value={alpha[2].m} placeholder="m">
+            <input required type="number" bind:value={alpha[2].s} placeholder="s">
         </div>
         <div class="input-wrapper delta-input">
             <span>δ<sub>2</sub>:</span>
-            <input required type="text" bind:value={delta[2].d} placeholder="°">
-            <input required type="text" bind:value={delta[2].m} placeholder="m">
-            <input required type="text" bind:value={delta[2].s} placeholder="s">
+            <input required type="number" bind:value={delta[2].d} placeholder="°">
+            <input required type="number" bind:value={delta[2].m} placeholder="m">
+            <input required type="number" bind:value={delta[2].s} placeholder="s">
         </div>
         <div class="input-wrapper t-input">
             <span>t<sub>2</sub>:</span>
@@ -123,27 +129,27 @@
         </div>
         <div class="input-wrapper X-input">
             <span>X<sub>2</sub>:</span>
-            <input required bind:value={X[2]} type="text">
+            <input required bind:value={X[2]} type="number">
         </div>
         <div class="input-wrapper Y-input">
             <span>Y<sub>2</sub>:</span>
-            <input required bind:value={Y[2]} type="text">
+            <input required bind:value={Y[2]} type="number">
         </div>
         <div class="input-wrapper Z-input">
             <span>Z<sub>2</sub>:</span>
-            <input required bind:value={Z[2]} type="text">
+            <input required bind:value={Z[2]} type="number">
         </div>
         <div class="input-wrapper"></div>
         <div class="input-wrapper"><button type="submit" style="width: 6em;" on:click={submit}>Calculate</button></div>
         <div class="input-wrapper"></div>
         <div class="textarea">
-            {#each out as text}
+            {#each outputLOG as text}
                 {text} <br>
             {/each}
         </div>
         <div class="input-wrapper"><button type="submit" style="width: 10em;" on:click={clear}>CLEAR</button></div>
         <div class="input-wrapper"></div>
-        <div class="input-wrapper"><button type="submit" style="width: 10em;" on:click={ () => { dispatch('addToScene', output) } }>ADD ORBIT</button></div>
+        <div class="input-wrapper"><button type="submit" style="width: 10em;" on:click={ () => { dispatch('addOrbitToScene', orbitElements) } }>ADD ORBIT</button></div>
     </div>
 <!-- </form> -->
 
@@ -191,5 +197,12 @@ button {
         width: 10%;
         cursor: pointer;
         color: white;
-    }
+        }
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
+}
 </style>

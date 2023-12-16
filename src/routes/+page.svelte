@@ -5,28 +5,23 @@
     import { Orbit } from "$lib/classes/Orbit.js"
     import OrbitHTML from "$lib/components/OrbitHTML.svelte"
     import ElementsToggle from "$lib/components/ElementsToggle.svelte"
-    import CalculatorInput from "../lib/components/CalculatorInput.svelte";
+    import CalculatorInput from "$lib/components/CalculatorInput.svelte";
 
-    let canvas, addOrbit, addToScene, changeOrbit, deleteOrbit, toggleObject, show, doShowElements, currentElement = {id: null, do: false}, orbitsList = []
+    let canvas, addOrbit, addOrbitToScene, changeOrbit, deleteOrbit, toggleObject, show, doShowElements, currentElement = {id: null, do: false}, orbitsList = []
     onMount(() => {
         let { baseRadius, animate, camera, scene, renderer, controls, clock, gridHelper, axesHelper, labelRenderer} = init(canvas)
         addOrbit = () => {
             const orbit = new Orbit({i: 0, Ω: 0, ω: 0}, 0, 1, 0, {}, '#46a62d', 1, 'New Orbit' )
             scene.add(orbit.getMesh())
-            orbitsList = [...orbitsList, orbit]
-            orbitsList = orbitsList
-            // orbit.toggleObject('ΩAngle', 1)
-            // orbit.toggleObject('ωAngle', 1)
+            orbitsList.push(orbit)
         }
         changeOrbit = ({i, Ω, ω, P, a, e, color, name, id}) => {
-            orbitsList[id].remove(scene)
+            scene.remove(orbitsList[id].getMesh())
             orbitsList[id] = new Orbit({i, Ω, ω}, P, a, e, {}, color, 1, name, orbitsList[id].states )
             scene.add(orbitsList[id].getMesh())
-
-            orbitsList = orbitsList
         }
         deleteOrbit = (id) => {
-            orbitsList[id].remove(scene)
+            scene.remove(orbitsList[id].getMesh())
             orbitsList.splice(id, 1)
             orbitsList = orbitsList
 
@@ -44,18 +39,17 @@
             const [key, value] = Object.entries(obj)[0]
             orbitsList[currentElement.id].toggleObject(key, value)
         }
-        addToScene = ({semimajor_axis: a, eccentricity: e, i, omega: ω, OMEGA: Ω}) => {
-            alert('dwadwa')
-            orbitsList = [...orbitsList, new Orbit({i, Ω, ω}, 1, a, e, {}, undefined, 1)]
-            scene.add(orbitsList[-1].getMesh())
-            orbitsList = orbitsList
+        addOrbitToScene = ({semimajor_axis: a, eccentricity: e, i, omega: ω, OMEGA: Ω }) => {
+            const orbit = new Orbit({i, Ω, ω}, 1, a, e, {}, undefined, 1)
+            orbitsList.push(orbit)
+            scene.add(orbit.getMesh())
         }
     })
     
 </script>
 
 <div id="calculator">
-    <CalculatorInput on:addToScene="{({detail}) => addToScene(detail)}"/>
+    <CalculatorInput on:addOrbitToScene = "{({detail}) => addOrbitToScene(detail)}"/>
 </div>
 
 <div id="orbits-list">

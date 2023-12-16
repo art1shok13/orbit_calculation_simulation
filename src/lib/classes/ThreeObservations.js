@@ -24,9 +24,9 @@ const t = [
 class OrbitCalculator {
     LOG = []
     constructor(
-            X = [0,0,0],
-            Y = [0,0,0],
-            Z = [0,0,0],
+            X = [0, 0, 0],
+            Y = [0, 0, 0],
+            Z = [0, 0, 0],
             alpha = [{h: 0, m: 0, s: 0}, {h: 0, m: 0, s: 0}, {h: 0, m: 0, s: 0}],
             delta = [{d: 0, m: 0, s: 0}, {d: 0, m: 0, s: 0}, {d: 0, m: 0, s: 0}],
             t = ['2011-09-30 00:00:00', '2011-09-30 00:00:00', '2011-09-30 00:00:00']
@@ -320,7 +320,7 @@ class OrbitCalculator {
             const dt = new Date()
             const timestamp = `[ ${dt.getHours()}:${dt.getMinutes()}:${dt.getSeconds()}:${dt.getMilliseconds()} ]`
 
-            const text = n + ' = ' + value
+            const text = n + ' = ' + value + ' '
             this.LOG = [...this.LOG, `${timestamp}   ${text}`]
         }     
     }
