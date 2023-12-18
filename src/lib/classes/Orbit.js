@@ -105,7 +105,7 @@ class Orbit {
 
         this.parihelion = this.special_point(color)
         this.parihelion.position.copy(this.getParihelionCords())
-        this.parihelionLabel = new LabelHelper(name + ' (Q)', color, `${100+a*8}%`, this.getParihelionCords())
+        this.parihelionLabel = new LabelHelper(name + ' (Q)', color, `${100+a*2}%`, this.getParihelionCords())
 
         this.aphelionHelper = this.special_point(color)
         this.aphelionHelper.position.copy(this.getAphelionCords())

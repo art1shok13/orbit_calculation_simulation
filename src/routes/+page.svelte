@@ -6,8 +6,10 @@
     import OrbitHTML from "$lib/components/OrbitHTML.svelte"
     import ElementsToggle from "$lib/components/ElementsToggle.svelte"
     import CalculatorInput from "$lib/components/CalculatorInput.svelte";
+    import {DEG2RAD} from "$lib/classes/utils.js"
 
-    let canvas, addOrbit, addOrbitToScene, changeOrbit, deleteOrbit, toggleObject, show, doShowElements, currentElement = {id: null, do: false}, orbitsList = []
+
+    let canvas, addOrbit, addOrbitToScene, changeOrbit, deleteOrbit, toggleObject, show, doShowElements, addSolarSystem, currentElement = {id: null, do: false}, orbitsList = []
     onMount(() => {
         let { baseRadius, animate, camera, scene, renderer, controls, clock, gridHelper, axesHelper, labelRenderer} = init(canvas)
         addOrbit = () => {
@@ -50,12 +52,32 @@
             orbitsList.push(orbit)
             orbitsList = orbitsList
         }
+        addSolarSystem = () => {
+            const solarSystem = [
+                new Orbit({i: DEG2RAD*7, Ω: DEG2RAD*48, ω: DEG2RAD*29}, 0, 0.387, 0.206, {}, '#ffffff', 1, 'Mercury' ),
+                new Orbit({i: DEG2RAD*3.4, Ω: DEG2RAD*77, ω: DEG2RAD*54}, 0, 0.723, 0.007, {}, '#ffffff', 1, 'Venus' ),
+                new Orbit({i: 0, Ω: 0, ω: DEG2RAD*103}, 0, 1, 0.017, {}, '#ffffff', 1, 'Earth' ),
+                new Orbit({i: DEG2RAD*1.85, Ω: DEG2RAD*49, ω: DEG2RAD*287}, 0, 1.524, 0.093, {}, '#ffffff', 1, 'Mars' ),
+                new Orbit({i: DEG2RAD*1.3, Ω: DEG2RAD*100, ω: DEG2RAD*-86}, 0, 5.203, 0.048, {}, '#ffffff', 1, 'Jupiter' ),
+                new Orbit({i: DEG2RAD*2.48, Ω: DEG2RAD*113, ω: DEG2RAD*-20}, 0, 9.555, 0.056, {}, '#ffffff', 1, 'Saturn' ),
+                new Orbit({i: DEG2RAD*0.76, Ω: DEG2RAD*74, ω: DEG2RAD*99}, 0, 19.218, 0.047, {}, '#ffffff', 1, 'Uranus' ),
+                new Orbit({i: DEG2RAD*1.77, Ω: DEG2RAD*132, ω: DEG2RAD*-84}, 0, 30.110, 0.009, {}, '#ffffff', 1, 'Neptune' )
+            ]
+
+            orbitsList = [...orbitsList, ...solarSystem]
+            orbitsList = orbitsList
+            solarSystem.forEach( (orbit) => {
+                scene.add(orbit.getMesh())
+            })
+        }
+        // addSolarSystem()
     })
     
 </script>
 
 <div id="calculator">
     <CalculatorInput on:addOrbitToScene = "{({detail}) => addOrbitToScene(detail)}"/>
+    <button on:click={addSolarSystem} style="width: 10em;">ADD SOLAR SYSTEM</button>
 </div>
 
 <div id="orbits-list">
