@@ -1,9 +1,39 @@
 const DEG2RAD = Math.PI / 180;
 const RAD2DEG = 180 / Math.PI;
+const {trunc} = Math
 
-function dateToJulianNumber(d){
-    const HperD = 86400000
-    return (d / HperD) - (d.getTimezoneOffset() / 1440) + 2440587.5
+function dateToJulianNumber(date){
+    const floatdays = (date.getUTCHours() + (date.getUTCMinutes() + date.getUTCSeconds() / 60) / 60) / 24
+    
+    const y = date.getFullYear()
+    const m = date.getMonth() + 1
+    const d = date.getDate() + floatdays
+    let y_ = y
+    let m_ = m
+    if(m == 1 || m == 2) {
+        y_ -= 1
+        m_ += 12
+    }
+
+    let B = 0
+    if(y>=1582) {
+        function calc() {
+            const A = trunc(y_/100)
+            B = 2 - A + trunc(A/4)
+        }
+        if(y>1582) calc()
+        if(y==1582) {
+            if(m>10) calc()
+            if(m==10 && d>=15) calc()
+        }
+    }
+    let C = trunc(365.25 * y_)
+    if(y_<0){
+        C = trunc((365.25 * y_) - 0.75)
+    }
+    const D = trunc(30.6001 * (m_ + 1))
+
+    return B + C + D + d + 1720994.5
 }
 
 function alphaToRad({h, m, s}){
@@ -56,4 +86,8 @@ const emptyArray = (n) => {
     return Array(n).fill()
 }
 
-export {RAD2DEG, DEG2RAD, alphaToRad, deltaToRad, dateToJulianNumber, Colors, determinant_3x3, emptyArray, angleFromSinCos}
+function toColor(num) {
+    return '#' + num.toString(16).padStart(6, '0')
+}
+
+export {toColor, RAD2DEG, DEG2RAD, alphaToRad, deltaToRad, dateToJulianNumber, Colors, determinant_3x3, emptyArray, angleFromSinCos}

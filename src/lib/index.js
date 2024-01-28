@@ -1,4 +1,3 @@
-import { browser } from '$app/environment'
 import * as THREE from 'three'
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -32,7 +31,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
             const yAxisDiv = document.createElement( 'div' );
                     yAxisDiv.className = 'label';
-                    yAxisDiv.textContent = 'Y';
+                    yAxisDiv.textContent = 'Z';
                     yAxisDiv.style.backgroundColor = 'transparent';
                     yAxisDiv.style.color ='green';
             const yAxisLabel = new CSS2DObject( yAxisDiv );
@@ -41,7 +40,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             
             const zAxisDiv = document.createElement( 'div' );
                     zAxisDiv.className = 'label';
-                    zAxisDiv.textContent = 'Z';
+                    zAxisDiv.textContent = 'Y';
                     zAxisDiv.style.backgroundColor = 'transparent';
                     zAxisDiv.style.color ='blue';
             const zAxisLabel = new CSS2DObject( zAxisDiv );

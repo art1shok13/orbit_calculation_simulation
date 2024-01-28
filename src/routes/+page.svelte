@@ -7,36 +7,46 @@
     import ElementsToggle from "$lib/components/ElementsToggle.svelte"
     import CalculatorInput from "$lib/components/CalculatorInput.svelte";
     import {DEG2RAD} from "$lib/classes/utils.js"
+    import {threeObservationsData} from '$lib/classes/store.js';
 
 
-    let canvas, addOrbit, addOrbitToScene, changeOrbit, deleteOrbit, toggleObject, show, doShowElements, addSolarSystem, currentElement = {id: null, do: false}, orbitsList = []
+    let canvas, orbitsList = [], clearScene, addOrbit, inputTester, addOrbitToScene, changeOrbit, deleteOrbit, toggleObject, show, doShowElements, addSolarSystem, currentElement = {id: null, do: false}
     onMount(() => {
         let { baseRadius, animate, camera, scene, renderer, controls, clock, gridHelper, axesHelper, labelRenderer} = init(canvas)
         addOrbit = () => {
-            const orbit = new Orbit({i: 0, Ω: 0, ω: 0}, 0, 1, 0, {}, '#46a62d', 1, 'New Orbit' )
+            const orbit = new Orbit({i: 0, Ω: 0, ω: 0}, 0, 1, 0, {}, '#46a62d', 1, 'New Orbit' + [...orbitsList].length )
             scene.add(orbit.getMesh())
-            orbitsList = [...orbitsList, orbit]
+            orbitsList.push(orbit)
             orbitsList = orbitsList
             // orbit.toggleObject('ΩAngle', 1)
             // orbit.toggleObject('ωAngle', 1)
         }
-        changeOrbit = ({i, Ω, ω, P, a, e, color, name, id}) => {
-            orbitsList[id].remove(scene)
-            orbitsList[id] = new Orbit({i, Ω, ω}, P, a, e, {}, color, 1, name, orbitsList[id].states )
+        changeOrbit = ({elements: {i, Ω, ω, a, e, color, name}, id})=> {
+            scene.remove(orbitsList[id].getMesh())
+            orbitsList.splice(id, 1, new Orbit({i, Ω, ω}, 0, a, e, {}, color, 1, name, orbitsList[id].states ))
             scene.add(orbitsList[id].getMesh())
 
             orbitsList = orbitsList
         }
-        deleteOrbit = (id) => {
-            orbitsList[id].remove(scene)
-            orbitsList.splice(id, 1)
+        deleteOrbit = (id, el) => {
+            scene.remove(orbitsList[id].getMesh())
+            el.remove()
+            orbitsList.splice(id, 1, null);
+            console.log(orbitsList)
+            
             orbitsList = orbitsList
-
+            doShowElements = false
+            currentElement = {}
+        }
+        clearScene = () => {
+            orbitsList = orbitsList.filter((el) => el!==null)
+            orbitsList.forEach((el) => {scene.remove(el.getMesh())})
+            orbitsList = []
             doShowElements = false
             currentElement = {}
         }
         currentElement = {id: null, do: false, states: null}
-        show = (id) => {
+        show = ({id}) => {
             if(currentElement.id != id && currentElement.do) return
             currentElement.id = id
             currentElement.do = !currentElement.do
@@ -44,10 +54,10 @@
         }   
         toggleObject = (obj) => {
             const [key, value] = Object.entries(obj)[0]
-            orbitsList[currentElement.id].toggleObject(key, value)
+            orbitsList[currentElement.id].toggleObject(key, value, scene)
         }
-        addOrbitToScene = ({semimajor_axis: a, eccentricity: e, i, omega: ω, OMEGA: Ω }) => {
-            const orbit = new Orbit({i, Ω, ω}, 1, a, e, {}, undefined, 1)
+        addOrbitToScene = ([name, color, {semimajor_axis: a, eccentricity: e, i, omega: ω, OMEGA: Ω }]) => {
+            const orbit = new Orbit({i, Ω, ω}, 1, a, e, {}, color, 1, name)
             scene.add(orbit.getMesh())
             orbitsList.push(orbit)
             orbitsList = orbitsList
@@ -63,14 +73,35 @@
                 new Orbit({i: DEG2RAD*0.76, Ω: DEG2RAD*74, ω: DEG2RAD*99}, 0, 19.218, 0.047, {}, '#ffffff', 1, 'Uranus' ),
                 new Orbit({i: DEG2RAD*1.77, Ω: DEG2RAD*132, ω: DEG2RAD*-84}, 0, 30.110, 0.009, {}, '#ffffff', 1, 'Neptune' )
             ]
-
-            orbitsList = [...orbitsList, ...solarSystem]
-            orbitsList = orbitsList
             solarSystem.forEach( (orbit) => {
                 scene.add(orbit.getMesh())
             })
+            orbitsList = [...orbitsList, ...solarSystem]
         }
-        // addSolarSystem()
+        inputTester = (index) => {
+            const testers = [
+                {
+                    X: [-0.99558786, -0.91681386, -0.73632421],
+                    Y: [-0.10133704, -0.35890992, -0.60944062],
+                    Z: [-0.04393054, -0.155592, -0.26419895],
+                    alpha: [{h:14, m:7, s:12.74}, {h:14, m:41, s:18.41}, {h:15, m:20, s:23.68}],
+                    delta: [{d:-5, m:47, s:32.6}, {d:-9, m:9, s:21.8}, {d:-12, m:28, s:51.2}],
+                    date: ['2011-09-30', '2011-10-17', '2011-11-05'],
+                    time: ['00:00:00', '00:00:00', '00:00:00']
+                },
+                {
+                    X: [0.816712395, 0.98637432, 0.84017824],
+                    Y: [-0.50943544, -0.11265284, 0.50685726],
+                    Z: [-0.22085384, -0.04884073, 0.21973176],
+                    alpha: [{h:0, m:18, s:0.9}, {h:0, m:56, s:48.41}, {h:1, m:55, s:49.47}],
+                    delta: [{d:7, m:12, s:8.1}, {d:9, m:50, s:27.1}, {d:13, m:45, s:38.4}],
+                    date: ['2011-02-15', '2011-3-14', '2011-04-24'],
+                    time: ['00:00:00', '00:00:00', '00:00:00']
+                }
+            ]
+            $threeObservationsData = testers[index]
+            // $threeObservationsData = {X, Y, Z, alpha, delta, date, time}
+        }
     })
     
 </script>
@@ -81,13 +112,14 @@
 </div>
 
 <div id="orbits-list">
-    {#each orbitsList as {i, Ω, ω, P, a, e, color, name}, index}
-        <OrbitHTML elements = {{i, Ω, ω, P, a, e, color, name, id: index}} id={index} on:show={({detail})=>{show(detail)}} on:change={({detail}) => changeOrbit(detail)} on:delete = { ({detail}) => deleteOrbit(detail)}/>
-    {/each}
     <div class="orbit">
         <button on:click={() => addOrbit()}>ADD ORBIT</button>
+        <button on:click={() => clearScene()}>CLEAR SCENE</button>
     </div>
-</div>
+    {#each orbitsList as elements, id}
+        <OrbitHTML {elements} {id} {show} {changeOrbit} {deleteOrbit}/>
+    {/each} 
+</div>  
 <div bind:this={canvas}></div>
 <div id="orbit-elements">
     {#if currentElement.do}

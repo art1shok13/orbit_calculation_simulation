@@ -13,7 +13,7 @@
             alpha: [{}, {}, {}],
             delta: [{}, {}, {}],
             date: [],
-            time: []
+            time: ['00:00:00', '00:00:00', '00:00:00']
         }
     }
     let {X, Y, Z, alpha, delta, date, time} = $threeObservationsData
@@ -47,6 +47,42 @@
 
         outputLOG = []
         orbitElements = {}
+    }
+
+    const inputTester = (index) => {
+            const testers = [
+                {
+                    X: [-0.99558786, -0.91681386, -0.73632421],
+                    Y: [-0.10133704, -0.35890992, -0.60944062],
+                    Z: [-0.04393054, -0.155592, -0.26419895],
+                    alpha: [{h:14, m:7, s:12.74}, {h:14, m:41, s:18.41}, {h:15, m:20, s:23.68}],
+                    delta: [{d:-5, m:47, s:32.6}, {d:-9, m:9, s:21.8}, {d:-12, m:28, s:51.2}],
+                    date: ['2011-09-30', '2011-10-17', '2011-11-05'],
+                    time: ['00:00:00', '00:00:00', '00:00:00']
+                },
+                {
+                    X: [0.816712395, 0.98637432, 0.84017824],
+                    Y: [-0.50943544, -0.11265284, 0.50685726],
+                    Z: [-0.22085384, -0.04884073, 0.21973176],
+                    alpha: [{h:0, m:18, s:0.9}, {h:0, m:56, s:48.41}, {h:1, m:55, s:49.47}],
+                    delta: [{d:7, m:13, s:8.1}, {d:9, m:50, s:27.1}, {d:13, m:45, s:38.4}],
+                    date: ['2011-02-15', '2011-03-14', '2011-04-24'],
+                    time: ['00:00:00', '00:00:00', '00:00:00']
+                }
+            ]
+            const testerNames = ['Test 1', 'Test 2']
+            const testerColors = ["#2233ff", '#6644ff']
+            $threeObservationsData = testers[index]
+            X = $threeObservationsData.X
+            Y = $threeObservationsData.Y
+            Z = $threeObservationsData.Z
+            alpha = $threeObservationsData.alpha
+            delta = $threeObservationsData.delta
+            date = $threeObservationsData.date  
+            time = $threeObservationsData.time
+            outputLOG = []
+            submit()
+            dispatch('addOrbitToScene', [testerNames[index], testerColors[index], orbitElements])
     }
     
 </script>
@@ -149,7 +185,9 @@
         </div>
         <div class="input-wrapper"><button type="submit" style="width: 10em;" on:click={clear}>CLEAR</button></div>
         <div class="input-wrapper"></div>
-        <div class="input-wrapper"><button type="submit" style="width: 10em;" on:click={ () => { dispatch('addOrbitToScene', orbitElements) } }>ADD ORBIT</button></div>
+        <div class="input-wrapper"><button type="submit" style="width: 10em;" on:click={ () => { dispatch('addOrbitToScene', ['orbit', '#ff11ff', orbitElements]) } }>ADD ORBIT</button></div>
+        <div class="input-wrapper"><button on:click={()=>{inputTester(0)}} style="width: 10em;">TEST 1</button></div>
+        <div class="input-wrapper"><button on:click={()=>{inputTester(1)}} style="width: 10em;">TEST 2</button></div>
     </div>
 <!-- </form> -->
 

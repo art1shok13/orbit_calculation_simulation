@@ -1,8 +1,13 @@
 import * as THREE from 'three';
 import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js';
+import { LabelHelper } from '$lib/classes/LabelHelper.js'
+import { RAD2DEG, DEG2RAD, toColor } from '$lib/classes/utils.js'
 import { Vector3, ArrowHelper, Mesh  } from 'three';
 Math.clamp = (num, min, max) => Math.min(Math.max(num, min), max)
-class AngleHelper extends Mesh{
+const { sin, cos, PI, sqrt, tan, sinh, cosh, abs } = Math
+
+
+class AngleHelper extends Mesh {
     constructor(
             angle,
             target = new Vector3(1, 1, 1),
@@ -10,60 +15,46 @@ class AngleHelper extends Mesh{
             origin = new Vector3(0, 0, 0),
             color = 0x00FF00,
         ) {
-        super();    
-        
+        super();
 
-        // let angleStart = new Vector3(plane.x, 0, Math.clamp(plane.z-plan xe.x, 0, 1))
-        // dir.applyAxisAngle( axis, angle*( (-1)**(plane.y-plane.x) ) )
-        const dir = target.clone().normalize()
         const length = target.length()
-        this.arrowHelper = new ArrowHelper(dir, origin, length, color)
-        this.arrowHelper1 = new ArrowHelper(startAxis.clone().normalize(), origin, length, color)
+        startAxis.normalize()
+        target.normalize()
+        const arrowHelper = new ArrowHelper(target, origin, length, color)
+        const arrowHelper1 = new ArrowHelper(startAxis, origin, length, color)
 
         const _ringFunction = (t, v, vector) => {
-            const p0 = startAxis.clone()
-                                .normalize()
-                                .divideScalar(2.5)
-            const p2 = target.clone()
-                             .normalize()
-                             .divideScalar(2.5)
-            const p1 = p0.clone()
-                         .lerp( p2, .5)
-                         .normalize()
-                         .divideScalar(2.5)
-                         .multiplyScalar(1.1)
-            if(Math.abs(angle) > 3.1415){
-                p1.negate().multiplyScalar(1.5)
-            }
-            const u = 1 - t;
-            const tt = t * t;
-            const uu = u * u;
-            let p = p0.multiplyScalar( uu ); 
-            p.add( p1.multiplyScalar(2 * u * t) )
-            p.add( p2.multiplyScalar(tt) )
-            vector.set(p.x, p.y, p.z)
+            const rotationAxis = new Vector3()
+                            .crossVectors(target, startAxis)
+                            .normalize()
+                            .negate();
+            if(angle > 3.1415) { rotationAxis.negate() }   
+
+            vector.copy(startAxis)
+                  .applyAxisAngle( rotationAxis, t*( angle ) )
+                  .multiplyScalar(length/2)
         }
 
         const _ringGeometry = new ParametricGeometry(_ringFunction, 100, 1)
         const _ringMaterial = new THREE.MeshStandardMaterial( { color, side: THREE.DoubleSide, wireframe: true} )
-        this.ring = new Mesh( _ringGeometry, _ringMaterial)
+        const ring = new Mesh( _ringGeometry, _ringMaterial)
+
+        let Label = new LabelHelper(`${angle.toFixed(3)} rad (${Math.round(RAD2DEG*angle)}°)`, toColor(color), `${100+1*2}%`, target.clone().multiplyScalar(length/2))
 
         this.position.copy( origin )
-        this.add( this.ring )
-        this.add(this.arrowHelper)
-        this.add(this.arrowHelper1)
+        this.add( ring )
+        this.add( arrowHelper )
+        this.add( arrowHelper1 )
+        // this.add( Label )
 
         // this.addEventListener( 'removed', removeChildren )
-        // function removeChildren( event ) {
-        //     const object = event.target;
-        //     for ( const children of object.children ) {
-        //         object.remove( children );
-        //     }
-        // }
+        function removeChildren( event ) {
+            const object = event.target;
+            for ( const children of object.children ) {
+                object.remove( children );
+            }
+        }
     }
-    // layersSet( n ){
-    //     this.traverse( function( child ) { child.layers.set( n ) } )
-    // }
 }
 
 export { AngleHelper }

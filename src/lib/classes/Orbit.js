@@ -10,7 +10,6 @@ class Orbit {
     constructor({i = 0, Ω = 0, ω = 0}, P, a = 0, e = 0, {x = 0, y = 0, z = 0}, color = '#46a62d', phi = 1, name = 'orbit', states = { aphelion: 0, iAngle: 0, ΩAngle: 0, ωAngle: 0, } ) {
         this.name = name
         //kepler orbit elements
-        Ω*=-1
         this.i = i
         this.Ω = Ω
         this.ω = ω
@@ -32,33 +31,29 @@ class Orbit {
             -1*( sin(Ω)*sin(ω) - cos(Ω)*cos(ω)*cos(PI - i) ),
         )
  
-        // const Qx = -cos(Ω)*sin(ω) - sin(Ω)*sin(ω)*cos(i)
-        // const Qy = -sin(Ω)*sin(ω) + cos(Ω)*cos(ω)*cos(i)
-        // const Qz =  cos(ω)*sin(i)
         this.color = color
         this.phi = phi
 
         this.states = { aphelionHelper: false, iHelper: false, ΩHelper: false, ωHelper: false, hHelper: false, nHelper: false, aHelper: false}
         
-        this.transform = (i, Ω, ω, _x, _y, _z, xr = 0, yr = 0 , zr = 0) => {
-            if (!i) Ω = 0
-            if (e>=1) Ω += PI
+        // this.transform = (i, Ω, ω, _x, _y, _z, xr = 0, yr = 0 , zr = 0) => {
+        //     if (!i) Ω = 0
+        //     if (e>=1) Ω += PI
             
-            let point = new Vector3(_x, _y, _z)
-            let r_point = new Vector3(xr, yr, zr)
+        //     let point = new Vector3(_x, _y, _z)
+        //     let r_point = new Vector3(xr, yr, zr)
 
-            const euler1 = new Euler( i, ω, 0 )
-            const euler2 = new Euler( 0, Ω, 0)
-            point.sub(r_point)
-                 .applyEuler(euler1)
-                 .applyEuler(euler2)
-            return point
-        }
+        //     const euler1 = new Euler( i, ω, 0 )
+        //     const euler2 = new Euler( 0, Ω, 0)
+        //     point.sub(r_point)
+        //          .applyEuler(euler1)
+        //          .applyEuler(euler2)
+        //     return point
+        // }
         //orbit func with t: [0,1]
         const orbitFunction = (t, v) => {
             if(e===1) {
                 const sigma = (t*2-1)*4
-                const r = a*(1+sigma**2)
                 const new_Q = this.Q_vec.clone().multiplyScalar(2*sigma)
                 const vec = this.P_vec
                                 .clone()
@@ -88,6 +83,7 @@ class Orbit {
                             .add( new_Q )            
             return new THREE.Vector3(vec.x, vec.y, vec.z)//this.transform(i, Ω, ω, _x, _y, _z)
         }
+
         this.orbitFunction = orbitFunction
 
         this.Mesh = new THREE.Group()
@@ -112,11 +108,11 @@ class Orbit {
 
         this.iHelper = new AngleHelper(i, this.getOrbitNormalVector().multiplyScalar(this.a), new Vector3( 0, 1, 0 ), origin, 0x00ff84)
         
-        this.ωHelper = new AngleHelper(ω, this.getParihelionCords(), this.getAscendingNodeVector(), origin, 0xff0084)
+        this.ωHelper = new AngleHelper(abs(ω), this.getParihelionCords(), this.getAscendingNodeVector(), origin, 0xff0084)
         
-        this.ΩHelper = new AngleHelper(Ω, this.getParihelionCords(), new Vector3( 1, 0, 0 ), origin, 0xff00ff)  
+        this.ΩHelper = new AngleHelper(abs(Ω), this.getAscendingNodeVector(), new Vector3( 1, 0, 0 ), origin, 0xff00ff)  
         if(i != 0 ){
-            this.ΩHelper = new AngleHelper(Ω, this.getAscendingNodeVector(), new Vector3( 1, 0, 0 ), origin, 0xff00ff)
+            this.ΩHelper = new AngleHelper(abs(Ω), this.getAscendingNodeVector(), new Vector3( 1, 0, 0 ), origin, 0xff00ff)
         }
 
         this.hHelper = new THREE.ArrowHelper(this.getOrbitNormalVector(), origin, a, color) 
@@ -140,7 +136,7 @@ class Orbit {
         }
     }
     remove(scene){
-        scene.remove(this.getMesh())
+        scene.remove(this.Mesh)
     }
 
     special_point(color, radius = .05) {
@@ -168,15 +164,6 @@ class Orbit {
         //     vector.applyEuler(euler)
         return vector
     }
-
-    // getFocusCords(){
-    //     const {i, Ω, ω, c, e, a} = this
-    //     return [
-    //             this.transform( i, Ω, ω,  0, 0, 0 ), 
-    //             this.transform( i, Ω, ω, 2*c, 0, 0 )
-    //         ]
-    // }   
-
     getParihelionCords( omega ){
         const {P_vec, a, e} = this
         const q = a*(1-e)
@@ -202,13 +189,12 @@ class Orbit {
         }
     }
 
-    toggleObject(name, state){
+    toggleObject(name, state, scene){
 
         if(!this.states[name] && state){
             this.getMesh().add(this[name])
             this.states[name] = Boolean(state)
         }
-
         if(this.states[name] && !state){
             this.getMesh().remove(this[name])
             this.states[name] = Boolean(state)

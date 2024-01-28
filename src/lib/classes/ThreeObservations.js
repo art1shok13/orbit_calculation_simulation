@@ -1,7 +1,7 @@
 import {RAD2DEG, DEG2RAD, alphaToRad, deltaToRad, dateToJulianNumber, determinant_3x3, emptyArray, angleFromSinCos} from '$lib/classes/utils.js'
 const { atan, sin, cos, PI, sqrt, tan, sinh, cosh, abs, asin, acos } = Math
 
-const X = [ -0.99558786,  -0.91681386, -0.73632421 ]
+const X = [ -0.99558786, -0.91681386, -0.73632421 ]
 const Y = [ -0.10133704, -0.35890992, -0.60944062 ]
 const Z = [ -0.04393054, -0.155592, -0.26419895 ]
 
@@ -41,11 +41,22 @@ class OrbitCalculator {
     }
     calculate_orbit(){
         let X = this.X, Y = this.Y, Z = this.Z, alpha = this.alpha, delta = this.delta, t = this.t
+        
+        const r_rho_iteration_count = 5
+        const aproximation_count = 1
+        const y_iteration_count = 1
+
+        const k = 0.017202098950 
+        const A = 0.0057755
+        
         //STEP: 1; converting alpha, delta angles to radians
         alpha = alpha.map((a) => alphaToRad(a) )
         delta = delta.map((d) => deltaToRad(d) )
+        
         //converting dates to Julian number
-        t = t.map((t) => dateToJulianNumber(new Date(t)) )
+        console.log(t)
+        t = t.map((t) => dateToJulianNumber(new Date(t + ':00 GMT+0000')) )
+        console.log(t)
 
         //STEP: 2; calculating directed cosines
         const lambda = emptyArray(3).map((lambda, index) => cos(delta[index]) * cos(alpha[index]))
@@ -83,7 +94,6 @@ class OrbitCalculator {
         this.log({D, d, d_, d__})
         
         //STEP 4; calculating tau
-        const k = 0.017202098950 
 
         const tau = [
             k * (t[2]-t[1]),
@@ -92,73 +102,60 @@ class OrbitCalculator {
         ]
         this.log({tau})
 
-        //STEP 5; calucalting n_0 (0,2) and v (0,2)
-        const n_0 = [
-            tau[0] / tau[1],
-            null,
-            tau[2] / tau[1]
-        ]
-        this.log({n_0})
-
-        const v = [
-            tau[0]*tau[2] * (1 + n_0[0]) / 6,
-            null,
-            tau[0]*tau[2] * (1 + n_0[2]) / 6,
-        ]
-        this.log({v})
-
-        //STEP 6; calucalting k_0 and l_0
-        const k_0 = ( d[0]*n_0[0] - d[1] + d[2]*n_0[2] ) / -D
-        const l_0 = ( d[0]*v[0] + d[2]*v[2] ) / -D
+        function rRhoIterator(tau){
+            const n_0 = [
+                tau[0] / tau[1],
+                null,
+                tau[2] / tau[1]
+            ]
         
-        this.log({k_0, l_0})
-
-        //STEP 7; calculation R*cosθ
-        const Rcos = lambda[1]*X[1] + mu[1]*Y[1] + nu[1]*Z[1]
-
-        //STEP 8; solving the eqution with two unknowns using iterator; srqd - ^2
-        const R_2_sqrd = X[1]**2 + Y[1]**2 + Z[1]**2
-        let p_2 = k_0
-        let r_2_sqrd 
-        for(let i = 0; i<=5; i++) {
-            r_2_sqrd = R_2_sqrd + p_2**2 - 2*p_2*Rcos
-            p_2 = k_0 + l_0 / sqrt(r_2_sqrd)**3
+            const v = [
+                tau[0]*tau[2] * (1 + n_0[0]) / 6,
+                null,
+                tau[0]*tau[2] * (1 + n_0[2]) / 6,
+            ]
+        
+            //STEP 6; calucalting k_0 and l_0
+            const k_0 = ( d[0]*n_0[0] - d[1] + d[2]*n_0[2] ) / -D
+            const l_0 = ( d[0]*v[0] + d[2]*v[2] ) / -D
+                    
+            //STEP 7; calculation R*cosθ
+            const Rcos = lambda[1]*X[1] + mu[1]*Y[1] + nu[1]*Z[1]
+        
+            //STEP 8; solving the eqution with two unknowns using iterator; srqd - ^2
+            const R_2_sqrd = X[1]**2 + Y[1]**2 + Z[1]**2
+            let p_2 = k_0
+            let r_2_sqrd 
+            for(let i = 0; i<=r_rho_iteration_count; i++) {
+                r_2_sqrd = R_2_sqrd + p_2**2 - 2*p_2*Rcos
+                p_2 = k_0 + l_0 / sqrt(r_2_sqrd)**3
+            }
+        
+            //STEP 9; n[0] and n[2]
+            const n = [
+                n_0[0] + v[0] / sqrt(r_2_sqrd)**3,
+                null,
+                n_0[2] + v[2] / sqrt(r_2_sqrd)**3
+            ]
+        
+            const rho = [
+                ( d_[0] * n[0] - d_[1] + n[2] * d_[2] ) / D / n[0],
+                ( d[0] * n[0] - d[1] + n[2] * d[2]) / -D,
+                ( d__[0] * n[0] - d__[1] + n[2] * d__[2]) / D / n[2]
+            ]
+        
+            const x = emptyArray(3).map((x, i) => lambda[i]*rho[i] - X[i])
+            const y = emptyArray(3).map((y, i) => mu[i]*rho[i] - Y[i])
+            const z = emptyArray(3).map((z, i) => nu[i]*rho[i] - Z[i])
+        
+            const r = emptyArray(3).map((r, i) => sqrt(x[i]**2 + y[i]**2 + z[i]**2) )
+            return {x, y, z, r, rho, n}
         }
-        this.log({p_2, r_2:sqrt(r_2_sqrd)})
-
-        //STEP 9; n[0] and n[2]
-        const n = [
-            n_0[0] + v[0] / sqrt(r_2_sqrd)**3,
-            null,
-            n_0[2] + v[2] / sqrt(r_2_sqrd)**3
-        ]
-        this.log({n})
-
-        // STEP 10; calculating system of equations
-        const right_side = [
-            X[0]*n[0] - X[1] + X[2]*n[2],
-            Y[0]*n[0] - Y[1] + Y[2]*n[2],
-            Z[0]*n[0] - Z[1] + Z[2]*n[2]
-        ]
-
-        const rho = [
-            ( d_[0] * n[0] - d_[1] + n[2] * d_[2] ) / D / n[0],
-            ( d[0] * n[0] - d[1] + n[2] * d[2]) / -D,
-            ( d__[0] * n[0] - d__[1] + n[2] * d__[2]) / D / n[2]
-        ]
-        this.log({rho})
-
-        //STEP 11; first aproximation
-        const x = emptyArray(3).map((x, i) => lambda[i]*rho[i] - X[i])
-        const y = emptyArray(3).map((y, i) => mu[i]*rho[i] - Y[i])
-        const z = emptyArray(3).map((z, i) => nu[i]*rho[i] - Z[i])
-
-        const r = emptyArray(3).map((r, i) => sqrt(x[i]**2 + y[i]**2 + z[i]**2) )
-        this.log({x, y, z})
+        
+        let iteratorOutput = rRhoIterator(tau)
 
         //STEP 13; aberation correction
-        const A = 0.0057755
-        const t_corrected = emptyArray(3).map((ttt, i) => t[i] - A*rho[i])
+        const t_corrected = emptyArray(3).map((ttt, i) => t[i] - A*iteratorOutput.rho[i])
         const tau_corrected = [
             k * (t_corrected[2] - t_corrected[1]),
             k * (t_corrected[2] - t_corrected[0]),
@@ -166,56 +163,74 @@ class OrbitCalculator {
         ]
         this.log({t_corrected, tau_corrected})
 
-        //STEP 15; m l
-        const chi = [
-            sqrt(2 * (r[1]*r[2] + x[1]*x[2] + y[1]*y[2] + z[1]*z[2])),
-            sqrt(2 * (r[0]*r[2] + x[0]*x[2] + y[0]*y[2] + z[0]*z[2])),
-            sqrt(2 * (r[1]*r[0] + x[1]*x[0] + y[1]*y[0] + z[1]*z[0])),
-        ]
+        iteratorOutput = rRhoIterator(tau_corrected)
+        const {x, y, z, r} = iteratorOutput
 
-        const m = emptyArray(3).map((m, i) => tau_corrected[i]**2 / chi[i]**3)
+        // this.log({x, y, z, r})
 
-        const l = [
-            ((r[1] + r[2])/chi[0] - 1)/2,
-            ((r[0] + r[2])/chi[1] - 1)/2,
-            ((r[1] + r[0])/chi[2] - 1)/2,
-        ]
-
-        this.log({chi, m, l})
-
-        //STEP 16; y1 y2 y3
-        const y_vec = emptyArray(3).map((y, i) => {
-            let y_vec = 1.05
-
-            for(let j = 0; j<=5; j++) {
-                const g = 2*asin(sqrt( m[i]/y_vec**2 - l[i] ))
-                const z = 1/y_vec**2  *  m[i]*(2*g - sin(2*g)) / sin(g)**3
-                y_vec = z + 1
-            }
-            return y_vec
-        })
-        this.log({y_vec})
-
-        //STEP 17; calculating new n (0, 2)
-        const n_new = [
-            tau_corrected[0]/tau_corrected[1]  *  y_vec[1]/y_vec[0],
-            null,
-            tau_corrected[2]/tau_corrected[1]  *  y_vec[1]/y_vec[2]
-        ]
-        this.log({n_new})
-        //STEP 18; calculatiing new rho and x,y,z
-        const rho_new = [
-            ( d_[0] * n_new[0] - d_[1] + n_new[2] * d_[2] ) / D / n_new[0],
-            ( d[0] * n_new[0] - d[1] + n_new[2] * d[2]) / -D,
-            ( d__[0] * n_new[0] - d__[1] + n_new[2] * d__[2]) / D / n_new[2]
-        ]
-
-        const x_new = emptyArray(3).map((x, i) => lambda[i]*rho_new[i] - X[i])
-        const y_new = emptyArray(3).map((y, i) => mu[i]*rho_new[i] - Y[i])
-        const z_new = emptyArray(3).map((z, i) => nu[i]*rho_new[i] - Z[i])
+        function SecondAndNextAproximations(x, y, z, r, tau_corrected, d, d_, d__, y_iteration_count){
         
-        const r_new = emptyArray(3).map((r, i) => sqrt(x_new[i]**2 + y_new[i]**2 + z_new[i]**2) )
-        this.log({rho_new, x_new, y_new, z_new, r_new})
+            const chi = [
+                sqrt(2 * (r[1]*r[2] + x[1]*x[2] + y[1]*y[2] + z[1]*z[2])),
+                sqrt(2 * (r[0]*r[2] + x[0]*x[2] + y[0]*y[2] + z[0]*z[2])),
+                sqrt(2 * (r[1]*r[0] + x[1]*x[0] + y[1]*y[0] + z[1]*z[0])),
+            ]
+            
+            const m = emptyArray(3).map((m, i) => tau_corrected[i]**2 / chi[i]**3)
+            
+            const l = [
+                ((r[1] + r[2])/chi[0] - 1)/2,
+                ((r[0] + r[2])/chi[1] - 1)/2,
+                ((r[1] + r[0])/chi[2] - 1)/2,
+            ]
+            
+            const y_vec = emptyArray(3).map((y, i) => {
+                let y_vec = 1.05
+            
+                for(let j = 0; j<=y_iteration_count; j++) {
+                    const g = 2*asin(sqrt( m[i]/y_vec**2 - l[i] ))
+                    const z = 1/y_vec**2  *  m[i]*(2*g - sin(2*g)) / sin(g)**3
+                    y_vec = z + 1
+                }
+                return y_vec
+            })
+
+            const n_new = [
+                tau_corrected[0]/tau_corrected[1]  *  y_vec[1]/y_vec[0],
+                null,
+                tau_corrected[2]/tau_corrected[1]  *  y_vec[1]/y_vec[2]
+            ]
+        
+            const rho_new = [
+                ( d_[0] * n_new[0] - d_[1] + n_new[2] * d_[2] ) / D / n_new[0],
+                ( d[0] * n_new[0] - d[1] + n_new[2] * d[2]) / -D,
+                ( d__[0] * n_new[0] - d__[1] + n_new[2] * d__[2]) / D / n_new[2]
+            ]
+            
+            const x_new = emptyArray(3).map((x, i) => lambda[i]*rho_new[i] - X[i])
+            const y_new = emptyArray(3).map((y, i) => mu[i]*rho_new[i] - Y[i])
+            const z_new = emptyArray(3).map((z, i) => nu[i]*rho_new[i] - Z[i])
+            
+            const r_new = emptyArray(3).map((r, i) => sqrt(x_new[i]**2 + y_new[i]**2 + z_new[i]**2) )
+        
+            return {rho_new, x_new, y_new, z_new, r_new, y_vec}
+        }
+        
+        let x_new = x
+        let y_new = y
+        let z_new = z
+        let r_new = r
+        let y_vec = []
+
+        for(let step=0; step!=aproximation_count; step++) {
+            const {x_new: x_step, y_new: y_step, z_new: z_step, r_new: r_step, y_vec: y_vec_step} = SecondAndNextAproximations(x_new, y_new, z_new, r_new, tau_corrected, d, d_, d__, y_iteration_count)
+            x_new = x_step
+            y_new = y_step
+            z_new = z_step
+            r_new = r_step
+            y_vec = y_vec_step
+        }
+        this.log({x_new, y_new, z_new})
 
         //CALCULATING ORBIT ELEMENTS
         const rrsinV2_V0 = sqrt(
@@ -223,6 +238,8 @@ class OrbitCalculator {
             ( z_new[0]*x_new[2] - z_new[2]*x_new[0] )**2 +
             ( x_new[0]*y_new[2] - x_new[2]*y_new[0] )**2
         )
+        this.log({rrsinV2_V0})
+
         const sinV2_V0 = rrsinV2_V0 / r_new[2] / r_new[0]
         
         const rrcosV2_V0 = x_new[0]*x_new[2] +y_new[0]*y_new[2] + z_new[0]*z_new[2]
@@ -264,7 +281,7 @@ class OrbitCalculator {
             y: ( y_new[0]*r_new[2]*cos(V[2]) - y_new[2]*r_new[0]*cos(V[0]) ) * -1 / rrsinV2_V0,
             z: ( z_new[0]*r_new[2]*cos(V[2]) - z_new[2]*r_new[0]*cos(V[0]) ) * -1 / rrsinV2_V0,
         }
-        this.log({P, Q})
+        // this.log({P, Q})
 
         //calculating orbit angles
         const epsilon = 23.439281*DEG2RAD
@@ -287,7 +304,7 @@ class OrbitCalculator {
 
         const i = acos(cosi) //i angle
 
-        this.log({omega, OMEGA, i})
+        this.log({omega: omega/PI*180, OMEGA: OMEGA/PI*180, i: i/PI*180})
 
         //calculating period
         const period = semimajor_axis**1.5 * 2 * PI / k
@@ -319,7 +336,6 @@ class OrbitCalculator {
         for(let [n, value] of Object.entries(input)) {
             const dt = new Date()
             const timestamp = `[ ${dt.getHours()}:${dt.getMinutes()}:${dt.getSeconds()}:${dt.getMilliseconds()} ]`
-
             const text = n + ' = ' + value + ' '
             this.LOG = [...this.LOG, `${timestamp}   ${text}`]
         }     

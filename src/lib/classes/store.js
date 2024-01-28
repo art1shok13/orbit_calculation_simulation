@@ -1,6 +1,9 @@
 import { writable, get } from "svelte/store";
-// import { browser } from "$app/environment";
+import { browser } from "$app/environment";
 
-export const threeObservationsData = writable(localStorage.getItem('threeObservationsData') || '{}')
-threeObservationsData.set(JSON.parse( get(threeObservationsData) ))
-threeObservationsData.subscribe( (val) => localStorage.setItem('threeObservationsData', JSON.stringify(val)))
+export const threeObservationsData = writable(browser && localStorage.getItem('threeObservationsData') || '{}')
+
+if (browser){
+    threeObservationsData.set(JSON.parse( get(threeObservationsData) ))
+    threeObservationsData.subscribe( (val) => localStorage.setItem('threeObservationsData', JSON.stringify(val)))
+}    
