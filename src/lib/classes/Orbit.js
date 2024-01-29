@@ -86,14 +86,14 @@ class Orbit {
 
         this.orbitFunction = orbitFunction
 
-        this.Mesh = new THREE.Group()
+        this.Mesh = new THREE.Group()   
 
         class OrbitCurve extends THREE.Curve {
             constructor() { super() }
             getPoint = orbitFunction
         }
-        let curve = new THREE.Mesh(
-            new THREE.TubeGeometry( new OrbitCurve(), 200, a*.005+.01, 8, false ),
+        let curve = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints( new OrbitCurve().getPoints(a*128) ),//new THREE.TubeGeometry( new OrbitCurve(), 200, a*.005+.01, 8, false ),
             new THREE.MeshBasicMaterial( { color: color } )
         )
         

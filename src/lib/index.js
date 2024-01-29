@@ -71,7 +71,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
             controls = new OrbitControls(camera, labelRenderer.domElement)
 
-            scene.add(gridHelper)
+        //     scene.add(gridHelper)
             scene.add(xAxisLabel)
             scene.add(yAxisLabel)
             scene.add(zAxisLabel)

@@ -46,7 +46,7 @@
             currentElement = {}
         }
         currentElement = {id: null, do: false, states: null}
-        show = ({id}) => {
+        show = (id) => {
             if(currentElement.id != id && currentElement.do) return
             currentElement.id = id
             currentElement.do = !currentElement.do
