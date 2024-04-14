@@ -68,10 +68,19 @@
                     delta: [{d:7, m:13, s:8.1}, {d:9, m:50, s:27.1}, {d:13, m:45, s:38.4}],
                     date: ['2011-02-15', '2011-03-14', '2011-04-24'],
                     time: ['00:00:00', '00:00:00', '00:00:00']
+                },
+                {
+                    X: [-0.5076442725808777,-0.008253474995058999,0.5083235212755292],
+                    Y: [-0.7775134786620973,-0.9025583921114275,-0.773125989459974],
+                    Z: [-0.3370282761754168,-0.3912335962105993,-0.3351297099671546],
+                    alpha: [{h:2,m:24,s:40.05},{h:2,m:15,s:22.2},{h:2,m:17,s:43.7}],
+                    delta: [{d:12,m:54,s:24.5},{d:12,m:15,s:47.2},{d:12,m:37,s:47.1}],
+                    date: ["2023-11-22","2023-12-22","2024-01-22"],
+                    time: ["00:00:00","00:00:00","00:00:00"]
                 }
             ]
-            const testerNames = ['Test 1', 'Test 2']
-            const testerColors = ["#2233ff", '#6644ff']
+            const testerNames = ['Test 1', 'Test 2', 'Test 3']
+            const testerColors = ["#2233ff", '#6644ff', '#28FFEE']
             $threeObservationsData = testers[index]
             X = $threeObservationsData.X
             Y = $threeObservationsData.Y
@@ -188,6 +197,7 @@
         <div class="input-wrapper"><button type="submit" style="width: 10em;" on:click={ () => { dispatch('addOrbitToScene', ['orbit', '#ff11ff', orbitElements]) } }>ADD ORBIT</button></div>
         <div class="input-wrapper"><button on:click={()=>{inputTester(0)}} style="width: 10em;">TEST 1</button></div>
         <div class="input-wrapper"><button on:click={()=>{inputTester(1)}} style="width: 10em;">TEST 2</button></div>
+        <div class="input-wrapper"><button on:click={()=>{inputTester(2)}} style="width: 10em;">TEST 3</button></div>
     </div>
 <!-- </form> -->
 

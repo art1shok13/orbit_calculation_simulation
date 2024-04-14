@@ -54,9 +54,7 @@ class OrbitCalculator {
         delta = delta.map((d) => deltaToRad(d) )
         
         //converting dates to Julian number
-        console.log(t)
         t = t.map((t) => dateToJulianNumber(new Date(t + ':00 GMT+0000')) )
-        console.log(t)
 
         //STEP: 2; calculating directed cosines
         const lambda = emptyArray(3).map((lambda, index) => cos(delta[index]) * cos(alpha[index]))
@@ -155,7 +153,7 @@ class OrbitCalculator {
         let iteratorOutput = rRhoIterator(tau)
 
         //STEP 13; aberation correction
-        const t_corrected = emptyArray(3).map((ttt, i) => t[i] - A*iteratorOutput.rho[i])
+        const t_corrected = emptyArray(3).map((val, i) => t[i] - A*iteratorOutput.rho[i])
         const tau_corrected = [
             k * (t_corrected[2] - t_corrected[1]),
             k * (t_corrected[2] - t_corrected[0]),
@@ -283,6 +281,15 @@ class OrbitCalculator {
         }
         // this.log({P, Q})
 
+        function eps(){
+            const T = (JD - 2451545) / 36525
+            const _omega_ = ( 125 + (2 + 40.28/60)/60 ) - ( 1934 + (8 + 10.539/60)/60 )*T + (7.455/3600)*T**2 + (0.008/3600)*T**3
+            const E0 = (84381.448 - 46.815*T - 0.00059*T**2 + 0.001813*T**3) / 3600
+            const DE = 9.2025*cos(_omega_/180*PI) / 3600
+            const eps = (E0 + DE)/180*PI
+        
+            return eps
+        }
         //calculating orbit angles
         const epsilon = 23.439281*DEG2RAD
         const sinwsini = P.z*cos(epsilon) - P.y*sin(epsilon)

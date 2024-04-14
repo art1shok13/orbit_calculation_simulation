@@ -1,5 +1,6 @@
 
 <script>
+    const {PI} = Math
     import { onMount } from "svelte"
     import { init } from "$lib/index.js"
     import { Orbit } from "$lib/classes/Orbit.js"
@@ -18,8 +19,6 @@
             scene.add(orbit.getMesh())
             orbitsList.push(orbit)
             orbitsList = orbitsList
-            // orbit.toggleObject('ΩAngle', 1)
-            // orbit.toggleObject('ωAngle', 1)
         }
         changeOrbit = ({elements: {i, Ω, ω, a, e, color, name}, id})=> {
             scene.remove(orbitsList[id].getMesh())
@@ -68,10 +67,10 @@
                 new Orbit({i: DEG2RAD*3.4, Ω: DEG2RAD*77, ω: DEG2RAD*54}, 0, 0.723, 0.007, {}, '#ffffff', 1, 'Venus' ),
                 new Orbit({i: 0, Ω: 0, ω: DEG2RAD*103}, 0, 1, 0.017, {}, '#ffffff', 1, 'Earth' ),
                 new Orbit({i: DEG2RAD*1.85, Ω: DEG2RAD*49, ω: DEG2RAD*287}, 0, 1.524, 0.093, {}, '#ffffff', 1, 'Mars' ),
-                new Orbit({i: DEG2RAD*1.3, Ω: DEG2RAD*100, ω: DEG2RAD*-86}, 0, 5.203, 0.048, {}, '#ffffff', 1, 'Jupiter' ),
-                new Orbit({i: DEG2RAD*2.48, Ω: DEG2RAD*113, ω: DEG2RAD*-20}, 0, 9.555, 0.056, {}, '#ffffff', 1, 'Saturn' ),
+                new Orbit({i: DEG2RAD*1.3, Ω: DEG2RAD*100, ω: DEG2RAD*-86+2*PI}, 0, 5.203, 0.048, {}, '#ffffff', 1, 'Jupiter' ),
+                new Orbit({i: DEG2RAD*2.48, Ω: DEG2RAD*113, ω: DEG2RAD*-20+2*PI}, 0, 9.555, 0.056, {}, '#ffffff', 1, 'Saturn' ),
                 new Orbit({i: DEG2RAD*0.76, Ω: DEG2RAD*74, ω: DEG2RAD*99}, 0, 19.218, 0.047, {}, '#ffffff', 1, 'Uranus' ),
-                new Orbit({i: DEG2RAD*1.77, Ω: DEG2RAD*132, ω: DEG2RAD*-84}, 0, 30.110, 0.009, {}, '#ffffff', 1, 'Neptune' )
+                new Orbit({i: DEG2RAD*1.77, Ω: DEG2RAD*132, ω: DEG2RAD*-84+2*PI}, 0, 30.110, 0.009, {}, '#ffffff', 1, 'Neptune' )
             ]
             solarSystem.forEach( (orbit) => {
                 scene.add(orbit.getMesh())
@@ -97,6 +96,15 @@
                     delta: [{d:7, m:12, s:8.1}, {d:9, m:50, s:27.1}, {d:13, m:45, s:38.4}],
                     date: ['2011-02-15', '2011-3-14', '2011-04-24'],
                     time: ['00:00:00', '00:00:00', '00:00:00']
+                },
+                {
+                    X: [-0.5076442725808777,-0.008253474995058999,0.5083235212755292],
+                    Y: [-0.7775134786620973,-0.9025583921114275,-0.773125989459974],
+                    Z: [-0.3370282761754168,-0.3912335962105993,-0.3351297099671546],
+                    alpha: [{h:2,m:24,s:40.05},{h:2,m:15,s:22.2},{h:2,m:17,s:43.7}],
+                    delta: [{d:12,m:54,s:24.5},{d:12,m:15,s:47.2},{d:12,m:37,s:47.1}],
+                    date: ["2023-11-22","2023-12-22","2024-01-22"],
+                    time: ["00:00:00","00:00:00","00:00:00"]
                 }
             ]
             $threeObservationsData = testers[index]
@@ -126,6 +134,7 @@
         <ElementsToggle states="{currentElement.states}" on:toggleObject="{({detail}) => toggleObject(detail)}"/>
     {/if}
 </div>
+
 <style>
     :global(body){
         display: grid;
@@ -135,6 +144,7 @@
         margin: 0;
         text-decoration: none;
         color: white;
+        background-color: var(--menu-color);
     }
     * {
         padding: 0;

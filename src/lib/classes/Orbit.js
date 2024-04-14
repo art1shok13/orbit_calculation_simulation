@@ -35,21 +35,7 @@ class Orbit {
         this.phi = phi
 
         this.states = { aphelionHelper: false, iHelper: false, ΩHelper: false, ωHelper: false, hHelper: false, nHelper: false, aHelper: false}
-        
-        // this.transform = (i, Ω, ω, _x, _y, _z, xr = 0, yr = 0 , zr = 0) => {
-        //     if (!i) Ω = 0
-        //     if (e>=1) Ω += PI
-            
-        //     let point = new Vector3(_x, _y, _z)
-        //     let r_point = new Vector3(xr, yr, zr)
 
-        //     const euler1 = new Euler( i, ω, 0 )
-        //     const euler2 = new Euler( 0, Ω, 0)
-        //     point.sub(r_point)
-        //          .applyEuler(euler1)
-        //          .applyEuler(euler2)
-        //     return point
-        // }
         //orbit func with t: [0,1]
         const orbitFunction = (t, v) => {
             if(e===1) {
