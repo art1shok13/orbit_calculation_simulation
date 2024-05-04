@@ -3,6 +3,8 @@ import { Vector3, Euler } from 'three'
 import { AngleHelper } from '$lib/classes/AngleHelper.js'
 import { DistanceHelper } from '$lib/classes/DistanceHelper.js'
 import { LabelHelper } from '$lib/classes/LabelHelper.js'
+import { VectorHelper } from '$lib/classes/VectorHelper.js'
+import { or } from 'three/examples/jsm/nodes/Nodes.js';
 const { sin, cos, PI, sqrt, tan, sinh, cosh, abs } = Math
 
 class Orbit {
@@ -21,24 +23,24 @@ class Orbit {
         
         //vector orbit elements
         this.P_vec = new THREE.Vector3(
-            cos(Ω)*cos(ω) - sin(Ω)*sin(ω)*cos(PI - i),
-            sin(ω)*sin(PI - i),
-            sin(Ω)*cos(ω) + cos(Ω)*sin(ω)*cos(PI - i),
+            cos(Ω)*cos(ω) - sin(Ω)*sin(-ω)*cos(PI - i),
+            sin(-ω)*sin(PI - i),
+            sin(Ω)*cos(ω) + cos(Ω)*sin(-ω)*cos(PI - i),
         )
         this.Q_vec = new THREE.Vector3(
-            -1*( cos(Ω)*sin(ω) + sin(Ω)*cos(ω)*cos(PI - i) ),
+            -1*( cos(Ω)*sin(-ω) + sin(Ω)*cos(ω)*cos(PI - i) ),
             cos(ω)*sin(PI - i),
-            -1*( sin(Ω)*sin(ω) - cos(Ω)*cos(ω)*cos(PI - i) ),
+            -1*( sin(Ω)*sin(-ω) - cos(Ω)*cos(ω)*cos(PI - i) ),
         )
  
         this.color = color
         this.phi = phi
 
-        this.states = { aphelionHelper: false, iHelper: false, ΩHelper: false, ωHelper: false, hHelper: false, nHelper: false, aHelper: false}
+        this.states = { aphelionHelper: false, iHelper: false, ΩHelper: false, ωHelper: false, hHelper: false, nHelper: false, qHelper: false, QHelper: false, aHelper: false}
 
         //orbit func with t: [0,1]
         const orbitFunction = (t, v) => {
-            if(e===1) {
+            if(e === 1) {
                 const sigma = (t*2-1)*4
                 const new_Q = this.Q_vec.clone().multiplyScalar(2*sigma)
                 const vec = this.P_vec
@@ -48,7 +50,7 @@ class Orbit {
                                 .multiplyScalar(a)
                 return new THREE.Vector3(vec.x, vec.y, vec.z)
             }
-            if(e>1) {
+            if(e > 1) {
                 const H = (t*2-1)*4
                 const new_Q = this.Q_vec.clone().multiplyScalar(sqrt(e**2-1) * sinh(H))
                 const vec = this.P_vec
@@ -101,15 +103,18 @@ class Orbit {
             this.ΩHelper = new AngleHelper(abs(Ω), this.getAscendingNodeVector(), new Vector3( 1, 0, 0 ), origin, 0xff00ff)
         }
 
-        this.hHelper = new THREE.ArrowHelper(this.getOrbitNormalVector(), origin, a, color) 
-        this.nHelper = new THREE.ArrowHelper(this.getAscendingNodeVector(), origin, a, color)  
-
+        this.hHelper = new VectorHelper(this.getOrbitNormalVector(), a, origin, color) 
+        this.nHelper = new VectorHelper(this.getAscendingNodeVector(), a, origin, color)  
+        
+        this.QHelper = new DistanceHelper(this.c - this.a, origin, this.getParihelionCords())
+        this.qHelper = new DistanceHelper(this.c + this.a, origin, this.getAphelionCords())
         this.aHelper = new DistanceHelper(a, this.getParihelionCords().normalize().negate().multiplyScalar(this.c), this.getParihelionCords())
 
         this.Mesh.add(curve)
         this.Mesh.add(this.parihelion)
         this.Mesh.add(this.parihelionLabel)
         for(const [name, state] of Object.entries(states)) {
+            console.log(name, state)
             this.toggleObject(name, state)
         }
 
@@ -143,11 +148,9 @@ class Orbit {
     }
 
     getAscendingNodeVector(){
-        const {i, Ω, a} = this
+        const {Ω, a} = this
         if (!Ω) {return new Vector3(1, 0, 0)} 
         const vector = new Vector3().crossVectors(new Vector3(0, 1, 0), this.getOrbitNormalVector() ).normalize().multiplyScalar(a)
-        // const euler = new Euler( 0, Ω, 0 )
-        //     vector.applyEuler(euler)
         return vector
     }
     getParihelionCords( omega ){
@@ -162,7 +165,8 @@ class Orbit {
     getAphelionCords(){
         const {P_vec, a, e} = this
         const Q = a*(1+e)
-        return P_vec.clone().normalize().multiplyScalar(Q)
+        if(e >= 1) return new Vector3(0, 0, 0)
+        return P_vec.clone().normalize().negate().multiplyScalar(Q)
     }
 
     getSemiLatusRectumCords(){
@@ -179,6 +183,7 @@ class Orbit {
 
         if(!this.states[name] && state){
             this.getMesh().add(this[name])
+            
             this.states[name] = Boolean(state)
         }
         if(this.states[name] && !state){

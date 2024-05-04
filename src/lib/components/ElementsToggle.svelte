@@ -21,15 +21,15 @@
 <div>
     <h3>Scalar elements</h3>
     <div class="input-grid">
-        <label for="Q">Q:<input bind:value="{QHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {QHelper})} id="Q"></label>
-        <label for="q">q:<input bind:value="{qHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {qHelper})} id="q"></label>
+        <label for="Q">Q:<input bind:checked="{QHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {QHelper})} id="Q"></label>
+        <label for="q">q:<input bind:checked="{qHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {qHelper})} id="q"></label>
     </div>
 </div>
 <div>
     <h3>Vector elements</h3>
     <div class="input-grid">
-        <label for="normal"><Vector text="h"/><input bind:value="{hHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {hHelper})} id="normal"></label>
-        <label for="ascending-node"><Vector text="n"/><input bind:value="{nHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {nHelper})} id="ascending-node"></label>
+        <label for="normal"><Vector text="h"/><input bind:checked="{hHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {hHelper})} id="normal"></label>
+        <label for="ascending-node"><Vector text="n"/><input bind:checked="{nHelper}" type="checkbox" on:change={()=> dispatch('toggleObject', {nHelper})} id="ascending-node"></label>
     </div>
 </div>
 

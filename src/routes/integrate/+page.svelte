@@ -136,7 +136,7 @@
             results.push({ t: t, x: state[0], y: state[1], z: state[2] });
             state = rungeKutta(t, state, h);
             t += h * directionOfIntegration;
-            log += `t: ${t}, x: ${state[0].toFixed(4)}, y: ${state[1].toFixed(4)}, z: ${state[2].toFixed(4)}, vx: ${state[3].toFixed(4)}, vx: ${state[4].toFixed(4)}, vx: ${state[5].toFixed(4)}\n`
+            log += `t: ${t}, x: ${state[0].toFixed(4)}, y: ${state[1].toFixed(4)}, z: ${state[2].toFixed(4)}, vx: ${state[3].toFixed(4)}, vy: ${state[4].toFixed(4)}, vz: ${state[5].toFixed(4)}\n`
         }
         results.forEach(result => {
             // console.log(result.x)
@@ -208,30 +208,34 @@
 
 <div class="container">
     <div class="inputs">
-        <span>a:</span>
-        <input required type="number" bind:value={a}>
-        <span>e:</span>
-        <input required type="number" bind:value={e}>
-        <span>Ω:</span>
-        <input required type="number" bind:value={OMEGA}>
-        <span>ω:</span>
-        <input required type="number" bind:value={omega}>
-        <span>M0:</span>
-        <input required type="number" bind:value={M0}>
-        <span>i:</span>
-        <input required type="number" bind:value={i}>
-        <br>
-        <span>JD0:</span>
-        <input required type="number" bind:value={JD0}>
-        <span>JD:</span>
-        <input required type="number" bind:value={JD}>
-        <span>h:</span>
-        <input required type="number" bind:value={h}>
+        <div>
+            <span>a:</span>
+            <input required type="number" bind:value={a}>
+            <span>e:</span>
+            <input required type="number" bind:value={e}>
+            <span>Ω:</span>
+            <input required type="number" bind:value={OMEGA}>
+            <span>ω:</span>
+            <input required type="number" bind:value={omega}>
+            <span>M0:</span>
+            <input required type="number" bind:value={M0}>
+            <span>i:</span>
+            <input required type="number" bind:value={i}>
+        </div>
+        <div>
+            <span>JD0:</span>
+            <input required type="number" bind:value={JD0}>
+            <span>JD:</span>
+            <input required type="number" bind:value={JD}>
+            <span>h:</span>
+            <input required type="number" bind:value={h}>
+        </div>
     </div>
     <div class="output">
-        <textarea width="" name="" id="">{log}</textarea>
+        <textarea id="log" width="" name="">{log}</textarea>
     </div>
     <button on:click={CALC}>CALCULATE</button>
+    <a href="/">ORBITS</a>
 </div>
 
 <style>
@@ -258,6 +262,18 @@
     }
     .inputs {
         width: 50%;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+    }
+    .inputs div {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    span {
+        margin-left: 10px;
     }
     :global(body){
         display: grid;
@@ -299,6 +315,12 @@
         background-color: var(--input-color);
         border-radius: 3px;
         padding: 3px;
+        color: white;
+    }
+    a {
+        text-decoration: underline;
+        font-size: 100%;
+        padding: 10px;
         color: white;
     }
 </style>

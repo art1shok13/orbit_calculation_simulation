@@ -31,7 +31,6 @@
             scene.remove(orbitsList[id].getMesh())
             el.remove()
             orbitsList.splice(id, 1, null);
-            console.log(orbitsList)
             
             orbitsList = orbitsList
             doShowElements = false
@@ -109,9 +108,9 @@
             ]
             $threeObservationsData = testers[index]
             // $threeObservationsData = {X, Y, Z, alpha, delta, date, time}
-        }
-    })
-    
+        }  
+    }) 
+
 </script>
 
 <div id="calculator">
@@ -133,6 +132,8 @@
     {#if currentElement.do}
         <ElementsToggle states="{currentElement.states}" on:toggleObject="{({detail}) => toggleObject(detail)}"/>
     {/if}
+    <a href="/solar">SOLAR COORDINATES</a>
+    <a href="/integrate">ORBIT INTEGRATION</a>
 </div>
 
 <style>
@@ -152,6 +153,11 @@
         text-decoration: none;
         border: 0;
         color: white;
+    }
+    a {
+        text-decoration: underline;
+        font-size: 75%;
+        padding: 10px;
     }
 
     :root {

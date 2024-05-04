@@ -17,7 +17,7 @@ class DistanceHelper extends Mesh{
             )
         this.add(line)
 
-        this.addEventListener( 'removed', removeChildren )
+        // this.addEventListener( 'removed', removeChildren )
         function removeChildren( event ) {
             const object = event.target;
             for ( const children of object.children ) {

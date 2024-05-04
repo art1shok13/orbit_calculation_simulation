@@ -27,7 +27,6 @@
         <input required type="number" bind:value={month}>
         <span>D:</span>
         <input required type="number" bind:value={date}>
-        <br>
         <span>H:</span>
         <input required type="number" bind:value={hour}>
         <span>M:</span>
@@ -42,6 +41,7 @@
         R: {dist}
     </div>
     <button on:click={CALC}>CALCULATE</button>
+    <a href="/">ORBITS</a>
 </div>
 
 <style>
@@ -57,7 +57,10 @@
         flex-direction: column;
     }
     .inputs {
-        width: 25%;
+        width: 35%;
+        display: flex;  
+        align-items: center;
+        margin-bottom: 15px;
     }
     :global(body){
         display: grid;
@@ -99,6 +102,12 @@
         background-color: var(--input-color);
         border-radius: 3px;
         padding: 3px;
+        color: white;
+    }
+    a {
+        text-decoration: underline;
+        font-size: 100%;
+        padding: 10px;
         color: white;
     }
 </style>
