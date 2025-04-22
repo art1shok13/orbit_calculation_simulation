@@ -232,12 +232,18 @@
 
 input {
     margin-left: .2em;
-    width: 70%;
+    width: 65%;
     background-color: var(--input-color);
     border-radius: 3px;
     padding: 3px;
     color: white;
 }
+
+.t-input {
+    width: 50%;
+    padding-left: 20px;
+}
+
 button {
         background-color: var(--input-color);
         padding: .2em;
