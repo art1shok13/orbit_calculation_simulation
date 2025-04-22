@@ -7,7 +7,7 @@ class DistanceHelper extends Mesh{
             length = 1,
             start = new Vector3(),
             end = new Vector3(1, 0, 0),
-            color
+            color = 0x00FF00,
         ) {
         super();
         

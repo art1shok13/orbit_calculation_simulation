@@ -8,8 +8,6 @@
     $: elements = {i, Ω, ω, a, e, color, name}
 
     let el
-    import {createEventDispatcher} from 'svelte';
-    const dispatch = createEventDispatcher();
 </script>
 
 <div class="orbit" id="{id}" bind:this = {el}>

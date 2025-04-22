@@ -17,6 +17,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 camera.position.z = baseRadius *.9
                 camera.position.y = baseRadius *.8
                 camera.position.x = baseRadius *.9
+                camera.up.set(0,0,1);
             
             gridHelper = new THREE.GridHelper(baseRadius, 10, 0xffffff)
 
@@ -31,7 +32,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
             const yAxisDiv = document.createElement( 'div' );
                     yAxisDiv.className = 'label';
-                    yAxisDiv.textContent = 'Z';
+                    yAxisDiv.textContent = 'Y';
                     yAxisDiv.style.backgroundColor = 'transparent';
                     yAxisDiv.style.color ='green';
             const yAxisLabel = new CSS2DObject( yAxisDiv );
@@ -40,7 +41,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             
             const zAxisDiv = document.createElement( 'div' );
                     zAxisDiv.className = 'label';
-                    zAxisDiv.textContent = 'Y';
+                    zAxisDiv.textContent = 'Z';
                     zAxisDiv.style.backgroundColor = 'transparent';
                     zAxisDiv.style.color ='blue';
             const zAxisLabel = new CSS2DObject( zAxisDiv );

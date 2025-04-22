@@ -4,12 +4,12 @@ import { AngleHelper } from '$lib/classes/AngleHelper.js'
 import { DistanceHelper } from '$lib/classes/DistanceHelper.js'
 import { LabelHelper } from '$lib/classes/LabelHelper.js'
 import { VectorHelper } from '$lib/classes/VectorHelper.js'
-import { or } from 'three/examples/jsm/nodes/Nodes.js';
+
 const { sin, cos, PI, sqrt, tan, sinh, cosh, abs } = Math
 
 class Orbit {
     transform
-    constructor({i = 0, Ω = 0, ω = 0}, P, a = 0, e = 0, {x = 0, y = 0, z = 0}, color = '#46a62d', phi = 1, name = 'orbit', states = { aphelion: 0, iAngle: 0, ΩAngle: 0, ωAngle: 0, } ) {
+    constructor({i = 0, Ω = 0, ω = 0}, P, a = 0, e = 0, {x = 0, y = 0, z = 0}, color = '#46a62d', phi = 1, name = 'orbit', states = {} ) {
         this.name = name
         //kepler orbit elements
         this.i = i
@@ -23,20 +23,20 @@ class Orbit {
         
         //vector orbit elements
         this.P_vec = new THREE.Vector3(
-            cos(Ω)*cos(ω) - sin(Ω)*sin(-ω)*cos(PI - i),
-            sin(-ω)*sin(PI - i),
-            sin(Ω)*cos(ω) + cos(Ω)*sin(-ω)*cos(PI - i),
+            cos(Ω)*cos(ω) - sin(Ω)*sin(ω)*cos(i),
+            sin(Ω)*cos(ω) + cos(Ω)*sin(ω)*cos(i),
+            sin(ω)*sin(i)
         )
         this.Q_vec = new THREE.Vector3(
-            -1*( cos(Ω)*sin(-ω) + sin(Ω)*cos(ω)*cos(PI - i) ),
-            cos(ω)*sin(PI - i),
-            -1*( sin(Ω)*sin(-ω) - cos(Ω)*cos(ω)*cos(PI - i) ),
+            -1*( cos(Ω)*sin(ω) + sin(Ω)*cos(ω)*cos(i) ),
+            -1*( sin(Ω)*sin(ω) - cos(Ω)*cos(ω)*cos(i) ),
+            cos(ω)*sin(i)
         )
  
         this.color = color
         this.phi = phi
 
-        this.states = { aphelionHelper: false, iHelper: false, ΩHelper: false, ωHelper: false, hHelper: false, nHelper: false, qHelper: false, QHelper: false, aHelper: false}
+        this.states = states//{ aphelionHelper: false, iHelper: false, ΩHelper: false, ωHelper: false, hHelper: false, nHelper: false, qHelper: false, QHelper: false, aHelper: false}
 
         //orbit func with t: [0,1]
         const orbitFunction = (t, v) => {
@@ -94,28 +94,36 @@ class Orbit {
         this.aphelionHelper = this.special_point(color)
         this.aphelionHelper.position.copy(this.getAphelionCords())
 
-        this.iHelper = new AngleHelper(i, this.getOrbitNormalVector().multiplyScalar(this.a), new Vector3( 0, 1, 0 ), origin, 0x00ff84)
-        
+        this.iHelper = new AngleHelper(i, this.getOrbitNormalVector().multiplyScalar(a), new Vector3(0, 0, 1),  origin, 0x00ff84)
+        this.iHelperLabel = new LabelHelper(`${this.i.toFixed(3)} rad (${Math.round(THREE.MathUtils.radToDeg(this.i))}°)`, '#00ff84', `${100 + a * 2}%`, this.getOrbitNormalVector().multiplyScalar(a / 2))
+
         this.ωHelper = new AngleHelper(abs(ω), this.getParihelionCords(), this.getAscendingNodeVector(), origin, 0xff0084)
-        
-        this.ΩHelper = new AngleHelper(abs(Ω), this.getAscendingNodeVector(), new Vector3( 1, 0, 0 ), origin, 0xff00ff)  
-        if(i != 0 ){
-            this.ΩHelper = new AngleHelper(abs(Ω), this.getAscendingNodeVector(), new Vector3( 1, 0, 0 ), origin, 0xff00ff)
-        }
+        this.ωHelperLabel = new LabelHelper(`${abs(ω).toFixed(3)} rad (${Math.round(THREE.MathUtils.radToDeg(abs(ω)))}°)`, '#ff0084', `${100 + a * 2}%`, this.getParihelionCords().multiplyScalar(0.5))
+
+        this.ΩHelper = new AngleHelper(abs(Ω), this.getAscendingNodeVector(), new Vector3(1, 0, 0), origin, 0xff00ff)
+        this.ΩHelperLabel = new LabelHelper(`${abs(Ω).toFixed(3)} rad (${Math.round(THREE.MathUtils.radToDeg(abs(Ω)))}°)`, '#ff00ff', `${100 + a * 2}%`, this.getAscendingNodeVector().multiplyScalar(0.5))
 
         this.hHelper = new VectorHelper(this.getOrbitNormalVector(), a, origin, color) 
         this.nHelper = new VectorHelper(this.getAscendingNodeVector(), a, origin, color)  
         
-        this.QHelper = new DistanceHelper(this.c - this.a, origin, this.getParihelionCords())
-        this.qHelper = new DistanceHelper(this.c + this.a, origin, this.getAphelionCords())
-        this.aHelper = new DistanceHelper(a, this.getParihelionCords().normalize().negate().multiplyScalar(this.c), this.getParihelionCords())
+        this.QHelper = new DistanceHelper(this.c - this.a, origin, this.getParihelionCords(), '#FFFFFF')
+        this.QHelperLabel = new LabelHelper(`Q: ${abs(this.c - this.a).toFixed(3)} au`, '#FFFFFF', `${100 + a * 2}%`, this.getParihelionCords().multiplyScalar(0.5))
 
+        this.qHelper = new DistanceHelper(this.c + this.a, origin, this.getAphelionCords(), '#FFFFFF')
+        this.qHelperLabel = new LabelHelper(`q: ${(this.c + this.a).toFixed(3)} au`, '#FFFFFF', `${100 + a * 2}%`, this.getAphelionCords().multiplyScalar(0.5))
+
+        this.aHelper = new DistanceHelper(a, this.getParihelionCords().normalize().negate().multiplyScalar(this.c), this.getParihelionCords(), '#FFFFFF')
+        this.aHelperLabel = new LabelHelper(`a: ${a.toFixed(3)} au`, '#FFFFFF', `${100 + a * 2}%`, this.getParihelionCords().multiplyScalar(0.5))
+        
         this.Mesh.add(curve)
         this.Mesh.add(this.parihelion)
         this.Mesh.add(this.parihelionLabel)
+
         for(const [name, state] of Object.entries(states)) {
-            console.log(name, state)
-            this.toggleObject(name, state)
+            if(state) {
+                this.getMesh().add(this[name])
+                this.getMesh().add(this[name+'Label'])
+            }
         }
 
         this.Mesh.addEventListener( 'removed', removeChildren )
@@ -149,8 +157,7 @@ class Orbit {
 
     getAscendingNodeVector(){
         const {Ω, a} = this
-        if (!Ω) {return new Vector3(1, 0, 0)} 
-        const vector = new Vector3().crossVectors(new Vector3(0, 1, 0), this.getOrbitNormalVector() ).normalize().multiplyScalar(a)
+        const vector = new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 0, 1), Ω).normalize().multiplyScalar(a)
         return vector
     }
     getParihelionCords( omega ){
@@ -170,7 +177,7 @@ class Orbit {
     }
 
     getSemiLatusRectumCords(){
-        const {Q_vec, semilatusrectum} = this
+        const {Q_vec, semilatusrectum, e} = this
         if(e<1){
             return [
                 Q_vec.clone().normalize().multiplyScalar(semilatusrectum),
@@ -179,17 +186,18 @@ class Orbit {
         }
     }
 
-    toggleObject(name, state, scene){
+    // toggleObject(name, state){
 
-        if(!this.states[name] && state){
-            this.getMesh().add(this[name])
-            
-            this.states[name] = Boolean(state)
-        }
-        if(this.states[name] && !state){
-            this.getMesh().remove(this[name])
-            this.states[name] = Boolean(state)
-        }
-    }
+    //     if(!this.states[name] && state){
+    //         this.getMesh().add(this[name])
+    //         this.getMesh().add(this[name+'Label'])
+    //         this.states[name] = Boolean(state)
+    //     }
+    //     if(this.states[name] && !state){
+    //         this.getMesh().remove(this[name])
+    //         this.getMesh().remove(this[name+'Label'])
+    //         this.states[name] = Boolean(state)
+    //     }
+    // }
 }
 export { Orbit }

@@ -17,21 +17,18 @@ class LabelHelper extends Mesh{
             LabelDiv.style.backgroundColor = 'transparent'
             LabelDiv.style.color = color
             LabelDiv.style.fontSize = fontSize
-        let Label = new CSS2DObject( LabelDiv )
+        const Label = new CSS2DObject( LabelDiv )
             Label.position.copy(pos)
             Label.translateY(.13)
             Label.center.set( 0, 0 )
-
-        this.add(Label)
+        this.add( Label )
 
         this.addEventListener( 'removed', removeChildren )
         function removeChildren( event ) {
-            const object = event.target;
-            for ( const children of object.children ) {
-                object.remove( children );
-            }
+            event.target.remove(Label)
         }
     }
+
 }
 
 export { LabelHelper }

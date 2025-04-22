@@ -52,7 +52,10 @@
         }   
         toggleObject = (obj) => {
             const [key, value] = Object.entries(obj)[0]
-            orbitsList[currentElement.id].toggleObject(key, value, scene)
+            orbitsList[currentElement.id].states[key] = value
+            orbitsList = orbitsList
+
+            changeOrbit({elements: orbitsList[currentElement.id], id: currentElement.id})
         }
         addOrbitToScene = ([name, color, {semimajor_axis: a, eccentricity: e, i, omega: ω, OMEGA: Ω }]) => {
             const orbit = new Orbit({i, Ω, ω}, 1, a, e, {}, color, 1, name)

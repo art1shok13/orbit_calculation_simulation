@@ -39,8 +39,8 @@ class AngleHelper extends Mesh {
         const _ringMaterial = new THREE.MeshStandardMaterial( { color, side: THREE.DoubleSide, wireframe: true} )
         const ring = new Mesh( _ringGeometry, _ringMaterial)
 
-        let Label = new LabelHelper(`${angle.toFixed(3)} rad (${Math.round(RAD2DEG*angle)}°)`, toColor(color), `${100+1*2}%`, target.clone().multiplyScalar(length/2))
-
+        const Label = new LabelHelper(`${angle.toFixed(3)} rad (${Math.round(RAD2DEG*angle)}°)`, toColor(color), `${100+1*2}%`, target.clone().multiplyScalar(length/2))
+        
         this.position.copy( origin )
         this.add( ring )
         this.add( arrowHelper )
@@ -48,12 +48,10 @@ class AngleHelper extends Mesh {
         // this.add( Label )
 
         // this.addEventListener( 'removed', removeChildren )
-        function removeChildren( event ) {
-            const object = event.target;
-            for ( const children of object.children ) {
-                object.remove( children );
-            }
-        }
+        // function removeChildren( event ) {
+        //     const object = event.target;
+        //     Label.removeSelf()
+        // }
     }
 }
 
